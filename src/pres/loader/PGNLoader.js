@@ -27,7 +27,7 @@ export default class PGNLoader extends React.Component {
         this.state = {
             playerName: playerName?playerName:'',
             site: selectedSite?selectedSite:'',
-            playerColor: color?color:this.props.settings.playerColor,
+            playerColor: color ? color : this.props.settings.playerColor,
             isAdvancedFiltersOpen: false,
             isGamesSubsectionOpen: false,
             expandedPanel: this.getInitiallyExpandedPanel(selectedSite, playerName),
