@@ -18,6 +18,7 @@ import * as SitePolicy from '../../app/SitePolicy'
 import { Radio, FormControlLabel, RadioGroup, FormHelperText, FormControl, FormLabel} from '@material-ui/core';
 import deepEqual from 'deep-equal'
 
+// Probably rename to Filters
 export default class User extends React.Component {
 
     constructor(props) {
