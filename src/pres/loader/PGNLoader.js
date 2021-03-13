@@ -1,5 +1,5 @@
 import React from 'react'
-import { createSubObjectWithProperties } from '../../app/util'
+import { createSubObjectWithProperties, parseDate } from '../../app/util'
 import * as Constants from '../../app/Constants'
 import { trackEvent } from '../../app/Analytics'
 import Source from './Source'
@@ -16,36 +16,39 @@ export default class PGNLoader extends React.Component {
     constructor(props) {
         super(props)
         let selectedSite = new URLSearchParams(window.location.search).get("source")
+        let playerName = new URLSearchParams(window.location.search).get("playerName")
+        let color = new URLSearchParams(window.location.search).get("color") // 'white' | 'black'
+        // 'all' | 'rated' | 'casual' (corresponds to Filters.toggleRated)
+        let ratedMode = new URLSearchParams(window.location.search).get("ratedMode")
+        let fromDate = new URLSearchParams(window.location.search).get("fromDate") // YYYY-MM-DD
+        let toDate = new URLSearchParams(window.location.search).get("toDate") // YYYY-MM-DD
+        let timeControls = this.getTimeControls()
 
         this.state = {
-            playerName: '',
+            playerName: playerName?playerName:'',
             site: selectedSite?selectedSite:'',
-            playerColor: this.props.settings.playerColor,
+            playerColor: color ? color : this.props.settings.playerColor,
             isAdvancedFiltersOpen: false,
             isGamesSubsectionOpen: false,
-            expandedPanel: selectedSite?'user':'source',
+            expandedPanel: this.getInitiallyExpandedPanel(selectedSite, playerName),
             notablePlayers:null,
             notableEvents:null,
             files:[],
             selectedNotableEvent:{},
             selectedNotablePlayer:{},
             lichessLoginState: Constants.LICHESS_NOT_LOGGED_IN,
-            lichessLoginName: null
+            lichessLoginName: null,
+            ...timeControls
         }
         if(selectedSite === Constants.SITE_LICHESS) {
             this.fetchLichessLoginStatus()
         }
         this.state[Constants.FILTER_NAME_DOWNLOAD_LIMIT] = Constants.MAX_DOWNLOAD_LIMIT
-        this.state[Constants.TIME_CONTROL_ULTRA_BULLET] = true
-        this.state[Constants.TIME_CONTROL_BULLET] = true
-        this.state[Constants.TIME_CONTROL_BLITZ] = true
-        this.state[Constants.TIME_CONTROL_RAPID] = true
-        this.state[Constants.TIME_CONTROL_CLASSICAL] = true
-        this.state[Constants.TIME_CONTROL_CORRESPONDENCE] = true
-        this.state[Constants.TIME_CONTROL_DAILY] = true
-        this.state[Constants.FILTER_NAME_RATED] = "all"
+        this.state[Constants.FILTER_NAME_RATED] = ratedMode ? ratedMode : "all"
         this.state[Constants.FILTER_NAME_ELO_RANGE] = [0, Constants.MAX_ELO_RATING]
         this.state[Constants.FILTER_NAME_OPPONENT] = ''
+        this.state[Constants.FILTER_NAME_FROM_DATE] = fromDate ? parseDate(fromDate) : null
+        this.state[Constants.FILTER_NAME_TO_DATE] = toDate ? parseDate(toDate) : null
     }
 
 
@@ -207,6 +210,43 @@ export default class PGNLoader extends React.Component {
         this.setState({expandedPanel:'source'})
         this.props.variantChange(newVariant)
         trackEvent(Constants.EVENT_CATEGORY_PGN_LOADER, "VariantChange", newVariant)
+    }
+    getInitiallyExpandedPanel(selectedSite, playerName) {
+        if (!selectedSite) {
+            return 'source'
+        } else if (!playerName) {
+            return 'user'
+        } else {
+            return 'filters'
+        }
+    }
+    getTimeControls() {
+        let selectedChoices = new URLSearchParams(window.location.search).get("timeControls")
+
+        const allChoices = [
+            Constants.TIME_CONTROL_ULTRA_BULLET,
+            Constants.TIME_CONTROL_BULLET,
+            Constants.TIME_CONTROL_BLITZ,
+            Constants.TIME_CONTROL_RAPID,
+            Constants.TIME_CONTROL_CLASSICAL,
+            Constants.TIME_CONTROL_CORRESPONDENCE,
+            Constants.TIME_CONTROL_DAILY
+        ]
+
+        if (!selectedChoices) {
+            const result = {}
+            for (const choice of allChoices) {
+                result[choice] = true
+            }
+            return result
+        } else {
+            selectedChoices = selectedChoices.split(',')
+            const result = {}
+            for (const choice of allChoices) {
+                result[choice] = selectedChoices.includes(choice)
+            }
+            return result
+        }
     }
 
     render() {
