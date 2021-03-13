@@ -23,9 +23,12 @@ export default class User extends React.Component {
 
     constructor(props) {
         super(props)
+
+        let isAdvancedFiltersOpen = new URLSearchParams(window.location.search).get("advanced") === 'true'
+
         this.state = {
             playerColor: this.props.playerColor,
-            isAdvancedFiltersOpen: false
+            isAdvancedFiltersOpen: isAdvancedFiltersOpen
         }
         this.timeframeSteps=this.props.timeframeSteps
         Object.assign(this.state, this.props.advancedFilters)
