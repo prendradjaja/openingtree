@@ -44,7 +44,7 @@ export default class PGNLoader extends React.Component {
             this.fetchLichessLoginStatus()
         }
         this.state[Constants.FILTER_NAME_DOWNLOAD_LIMIT] = Constants.MAX_DOWNLOAD_LIMIT
-        this.state[Constants.FILTER_NAME_RATED] = ratedMode?ratedMode:"all"
+        this.state[Constants.FILTER_NAME_RATED] = ratedMode ? ratedMode : "all"
         this.state[Constants.FILTER_NAME_ELO_RANGE] = [0, Constants.MAX_ELO_RATING]
         this.state[Constants.FILTER_NAME_OPPONENT] = ''
         this.state[Constants.FILTER_NAME_FROM_DATE] = fromDate ? parseDate(fromDate) : null
